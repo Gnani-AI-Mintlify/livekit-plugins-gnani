@@ -1,0 +1,78 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "livekit-plugins-gnani"
+version = "0.1.0"
+description = "LiveKit Agents plugin for Gnani Vachana speech AI — STT & TTS for Indian languages"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+authors = [
+    { name = "Genvoice", email = "speechstack@gnani.ai" },
+]
+keywords = [
+    "webrtc", "realtime", "audio", "livekit", "livekit-agents",
+    "gnani", "vachana", "indian-languages", "indic",
+    "stt", "tts", "speech-to-text", "text-to-speech",
+    "multilingual", "streaming", "websocket",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "livekit-agents[codecs]>=1.5.8",
+    "gnani-vachana>=0.2.2,<1.0",
+    "websockets>=13.1,<16.0",
+]
+
+[project.urls]
+Homepage = "https://gnani.ai"
+Documentation = "https://docs.inya.ai/vachana"
+Repository = "https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani"
+Issues = "https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["livekit"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/livekit"]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "UP", "B", "SIM", "TCH", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["livekit"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
