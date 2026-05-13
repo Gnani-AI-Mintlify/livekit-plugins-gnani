@@ -40,12 +40,15 @@ GnaniTTSEncodings = Literal["linear_pcm", "oggopus"]
 GnaniTTSContainers = Literal["raw", "mp3", "wav", "mulaw", "ogg"]
 
 
+SUPPORTED_SAMPLE_RATES = (8000, 16000, 22050, 44100)
+
+
 @dataclass
 class GnaniTTSOptions:
     api_key: str
     voice: str = "sia"
     model: str = "vachana-voice-v2"
-    sample_rate: int = 24000
+    sample_rate: int = 16000
     encoding: str = "linear_pcm"
     container: str = "wav"
     num_channels: int = 1
@@ -76,7 +79,7 @@ class TTS(tts.TTS):
         *,
         voice: GnaniTTSVoices | str = "sia",
         model: str = "vachana-voice-v2",
-        sample_rate: int = 24000,
+        sample_rate: int = 16000,
         num_channels: int = 1,
         encoding: GnaniTTSEncodings | str = "linear_pcm",
         container: GnaniTTSContainers | str = "wav",
@@ -84,8 +87,13 @@ class TTS(tts.TTS):
         base_url: str = GNANI_TTS_BASE_URL,
         language: str = "IND-IN",
     ) -> None:
+        if sample_rate not in SUPPORTED_SAMPLE_RATES:
+            raise ValueError(
+                f"sample_rate must be one of {SUPPORTED_SAMPLE_RATES}, got {sample_rate}"
+            )
+
         super().__init__(
-            capabilities=tts.TTSCapabilities(streaming=True),
+            capabilities=tts.TTSCapabilities(streaming=False),
             sample_rate=sample_rate,
             num_channels=num_channels,
         )

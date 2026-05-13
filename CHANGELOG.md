@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-13
+
+### Changed
+
+- Default TTS sample rate changed from 22050 to 16000 Hz for better compatibility with voice agent pipelines.
+- Added sample rate validation in TTS constructor — raises `ValueError` if sample rate is not one of 8000, 16000, 22050, or 44100.
+- Removed verbose debug logging from chunked TTS response handler.
+
 ## [0.1.0] - 2026-05-12
 
 ### Added
@@ -17,4 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LiveKit Agents `Plugin.register_plugin()` integration for automatic discovery.
 - Built on top of the [`gnani-vachana`](https://pypi.org/project/gnani-vachana/) core SDK.
 
+[0.2.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.1.0
