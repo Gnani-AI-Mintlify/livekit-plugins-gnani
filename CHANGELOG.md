@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-05-21
+
+### Added
+
+- **250+ v3 TTS voices** (capitalized, e.g. `"Karan"`, `"Simran"`) — language-specific voices across 22 Indian languages.
+- **23 STT languages** — expanded from 10 to 23 languages including Assamese, Bodo, Dogri, Kashmiri, Konkani, Maithili, Manipuri, Nepali, Odia, Sanskrit, Santhali, Sindhi, and Urdu.
+- Legacy v2 voices (lowercase: `"sia"`, `"raju"`, `"karan"`, etc.) remain supported for backward compatibility.
+- `LEGACY_V2_VOICES` and `V3_VOICES` sets for programmatic distinction.
+
+### Changed
+
+- **Default TTS model** upgraded from `vachana-voice-v2` to `vachana-voice-v3`.
+- **Default TTS voice** changed from `"sia"` to `"Karan"`.
+- **Default TTS language** changed from `"IND-IN"` to `"hi"` (ISO 639-1 code).
+- Voice validation is now case-sensitive — `"karan"` targets v2 model, `"Karan"` targets v3 model.
+- Minimum `gnani-vachana` dependency bumped to `>=0.3.0`.
+
 ## [0.2.0] - 2026-05-13
 
 ### Changed
@@ -25,5 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LiveKit Agents `Plugin.register_plugin()` integration for automatic discovery.
 - Built on top of the [`gnani-vachana`](https://pypi.org/project/gnani-vachana/) core SDK.
 
+[0.3.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.3.0
 [0.2.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.1.0

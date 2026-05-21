@@ -5,7 +5,7 @@
 
 [LiveKit Agents](https://github.com/livekit/agents) plugin for **[Gnani Vachana](https://gnani.ai/)** — high-accuracy Speech-to-Text and low-latency Text-to-Speech for Indian languages.
 
-> **Vachana** is a production-ready speech AI platform by [Gnani.ai](https://gnani.ai) supporting 10+ Indian languages with real-time streaming, multilingual transcription, and code-switching capabilities.
+> **Vachana** is a production-ready speech AI platform by [Gnani.ai](https://gnani.ai) supporting 22+ Indian languages with 250+ voices, real-time streaming, multilingual transcription, and code-switching capabilities.
 
 ## Installation
 
@@ -46,7 +46,7 @@ stt = STT(language="hi-IN")
 ```python
 from livekit.plugins.gnani import TTS
 
-tts = TTS(voice="sia")
+tts = TTS(voice="Karan")
 
 # Use with a LiveKit voice agent pipeline
 ```
@@ -57,7 +57,7 @@ tts = TTS(voice="sia")
 
 - **Batch recognition** — REST API (`POST /stt/v3`) for file-based transcription
 - **Real-time streaming** — WebSocket API for live audio transcription with VAD
-- **10 Indian languages** — bn-IN, en-IN, gu-IN, hi-IN, kn-IN, ml-IN, mr-IN, pa-IN, ta-IN, te-IN
+- **23 Indian languages** — Assamese, Bengali, Bodo, Dogri, English (India), Gujarati, Hindi, Kannada, Kashmiri, Konkani, Maithili, Malayalam, Manipuri, Marathi, Nepali, Odia, Punjabi, Sanskrit, Santhali, Sindhi, Tamil, Telugu, Urdu
 - **Code-switching** — Hinglish (en-hi-IN-latn) and Hindi-English mixed (en-hi-in-cm) for streaming
 - **Sample rates** — 8 kHz and 16 kHz
 
@@ -65,46 +65,113 @@ tts = TTS(voice="sia")
 
 - **Chunked synthesis** — REST API for single-request audio generation
 - **Real-time streaming** — WebSocket API for low-latency streaming synthesis
-- **8 voices** — sia, raju, kanika, nikita, ravan, simran, karan, neha
+- **250+ voices** — language-specific voices across 22 Indian languages (e.g. Karan, Simran, Riya, Aarav, Priya, and many more)
+- **Model** — `vachana-voice-v3` with voice cloning support
 - **Configurable output** — sample rate (8000–44100), encoding (linear_pcm, oggopus), container (raw, mp3, wav, mulaw, ogg)
 
 ## Supported Languages
 
-| Language        | Code    |
-|-----------------|---------|
-| Bengali         | `bn-IN` |
-| English (India) | `en-IN` |
-| Gujarati        | `gu-IN` |
-| Hindi           | `hi-IN` |
-| Kannada         | `kn-IN` |
-| Malayalam       | `ml-IN` |
-| Marathi         | `mr-IN` |
-| Punjabi         | `pa-IN` |
-| Tamil           | `ta-IN` |
-| Telugu          | `te-IN` |
+### STT Languages (Speech-to-Text) — 10 languages
 
-## Available Voices
+STT uses BCP-47 locale codes (e.g. `hi-IN`):
 
-| Voice   | ID        |
-|---------|-----------|
-| Sia     | `sia`     |
-| Raju    | `raju`    |
-| Kanika  | `kanika`  |
-| Nikita  | `nikita`  |
-| Ravan   | `ravan`   |
-| Simran  | `simran`  |
-| Karan   | `karan`   |
-| Neha    | `neha`    |
+| Language        | Code      |
+|-----------------|-----------|
+| English (India) | `en-IN`   |
+| Hindi           | `hi-IN`   |
+| Gujarati        | `gu-IN`   |
+| Tamil           | `ta-IN`   |
+| Kannada         | `kn-IN`   |
+| Telugu          | `te-IN`   |
+| Marathi         | `mr-IN`   |
+| Bengali         | `bn-IN`   |
+| Malayalam       | `ml-IN`   |
+| Punjabi         | `pa-IN`   |
+
+Plus streaming-only experimental: `en-hi-IN-latn` (Hinglish), `en-hi-in-cm` (code-mixed).
+
+---
+
+### TTS Languages (Text-to-Speech) — 22 languages
+
+TTS uses ISO 639 language codes (e.g. `hi`, `bn`). Pass these via the `language` parameter.
+
+| Language   | Code  | Sample Voices               |
+|------------|-------|-----------------------------|
+| Assamese   | `as`  | Priya, Arjun                |
+| Bengali    | `bn`  | Ananya, Abhik               |
+| Bodo       | `brx` | Anamika, Anil               |
+| Dogri      | `doi` | Asha, Ajay                  |
+| Gujarati   | `gu`  | Avani, Akshay               |
+| Hindi      | `hi`  | Aarav, Deepak               |
+| Kannada    | `kn`  | Anitha, Aditya              |
+| Kashmiri   | `ks`  | Aafreen, Altaf              |
+| Konkani    | `kok` | Alka, Agnelo                |
+| Maithili   | `mai` | Archana, Amaresh            |
+| Malayalam  | `ml`  | Ambika, Abhilash            |
+| Manipuri   | `mni` | Achouba, Dinamani           |
+| Marathi    | `mr`  | Aparna, Amol                |
+| Nepali     | `ne`  | Anita, Amar                 |
+| Odia       | `or`  | Anuradha, Asutosh           |
+| Punjabi    | `pa`  | Amandeep, Amarjit           |
+| Sanskrit   | `sa`  | Akshara, Achyut             |
+| Santhali   | `sat` | Arjun_S, Birsa              |
+| Sindhi     | `sd`  | Ameena, Bhagwanti           |
+| Tamil      | `ta`  | Abinaya, Anbarasan          |
+| Telugu     | `te`  | Alekhya, Adithya            |
+| Urdu       | `ur`  | Aiza, Asad                  |
+
+## Available Voices (Sample)
+
+The TTS API supports 250+ voices across all supported languages. Here are some primary voices:
+
+| Voice   | ID        | Language    |
+|---------|-----------|-------------|
+| Karan   | `Karan`   | Primary     |
+| Simran  | `Simran`  | Primary     |
+| Nara    | `Nara`    | Primary     |
+| Riya    | `Riya`    | Primary     |
+| Viraj   | `Viraj`   | Primary     |
+| Raju    | `Raju`    | Primary     |
+| Aarav   | `Aarav`   | Hindi       |
+| Priya   | `Priya`   | Assamese    |
+| Ananya  | `Ananya`  | Bengali     |
+| Avani   | `Avani`   | Gujarati    |
+| Anitha  | `Anitha`  | Kannada     |
+| Ambika  | `Ambika`  | Malayalam   |
+| Aparna  | `Aparna`  | Marathi     |
+| Abinaya | `Abinaya` | Tamil       |
+| Alekhya | `Alekhya` | Telugu      |
+| Aiza    | `Aiza`    | Urdu        |
+
+Each language has 8–16 dedicated voices (male and female). Use `SUPPORTED_VOICES` from the package for the full list.
+
+### Legacy v2 Voices
+
+The following lowercase voices from `vachana-voice-v2` are still supported for backward compatibility:
+
+| Voice   | ID        | Model           |
+|---------|-----------|-----------------|
+| Sia     | `sia`     | vachana-voice-v2 |
+| Raju    | `raju`    | vachana-voice-v2 |
+| Kanika  | `kanika`  | vachana-voice-v2 |
+| Nikita  | `nikita`  | vachana-voice-v2 |
+| Ravan   | `ravan`   | vachana-voice-v2 |
+| Simran  | `simran`  | vachana-voice-v2 |
+| Karan   | `karan`   | vachana-voice-v2 |
+| Neha    | `neha`    | vachana-voice-v2 |
+
+> **Note:** Casing matters! `"karan"` (lowercase) uses the old v2 model, while `"Karan"` (capitalized) uses the new v3 model.
 
 ## Architecture
 
 ```
-gnani-vachana           ← Core SDK (REST, WebSocket, SSE clients)
+gnani-vachana (>=0.3.0)   ← Core SDK (REST, WebSocket, SSE clients, voice/language constants)
     ↑
-livekit-plugins-gnani   ← This package (LiveKit Agents adapter)
+livekit-plugins-gnani     ← This package (LiveKit Agents adapter)
 ```
 
-This plugin is a thin adapter that wraps the `gnani-vachana` SDK into LiveKit's `stt.STT` and `tts.TTS` base classes. All connection logic, authentication, and audio format handling lives in the core SDK.
+This plugin is a thin adapter that wraps the `gnani-vachana` SDK into LiveKit's `stt.STT` and `tts.TTS` base classes. Voice lists, language constants, and model definitions are shared with the core SDK.
 
 ## Documentation
 

@@ -31,16 +31,19 @@ from .log import logger
 GNANI_STT_BASE_URL = "https://api.vachana.ai"
 
 GnaniSTTLanguages = Literal[
-    "bn-IN", "en-IN", "gu-IN", "hi-IN", "kn-IN",
-    "ml-IN", "mr-IN", "pa-IN", "ta-IN", "te-IN",
+    "en-IN", "hi-IN", "gu-IN", "ta-IN", "kn-IN", "te-IN",
+    "mr-IN", "bn-IN", "ml-IN", "pa-IN",
 ]
 
 SUPPORTED_LANGUAGES: set[str] = {
-    "bn-IN", "en-IN", "gu-IN", "hi-IN", "kn-IN",
-    "ml-IN", "mr-IN", "pa-IN", "ta-IN", "te-IN",
+    "en-IN", "hi-IN", "gu-IN", "ta-IN", "kn-IN", "te-IN",
+    "mr-IN", "bn-IN", "ml-IN", "pa-IN",
+    "en-IN,hi-IN",
 }
 
-STREAM_SUPPORTED_LANGUAGES: set[str] = SUPPORTED_LANGUAGES | {
+STREAM_SUPPORTED_LANGUAGES: set[str] = {
+    "bn-IN", "en-IN", "gu-IN", "hi-IN", "kn-IN",
+    "ml-IN", "mr-IN", "pa-IN", "ta-IN", "te-IN",
     "en-hi-IN-latn", "en-hi-in-cm",
 }
 
