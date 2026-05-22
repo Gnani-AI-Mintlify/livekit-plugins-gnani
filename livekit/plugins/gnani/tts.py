@@ -570,5 +570,5 @@ class SynthesizeStream(tts.SynthesizeStream):
             raise
         except Exception as e:
             raise APIConnectionError(f"Gnani TTS WebSocket error: {e}") from e
-        finally:
-            output_emitter.end_segment()
+
+        output_emitter.end_segment()

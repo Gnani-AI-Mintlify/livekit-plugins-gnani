@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3] - 2026-05-22
+
+### Fixed
+
+- **Double `end_segment()` in `SynthesizeStream`** — moved `end_segment()` out of the `finally` block to the normal completion path. The framework's `end_input()` already calls `__end_segment()` internally, so the `finally` was sending a duplicate `_EndSegment` message.
+
 ## [0.4.2] - 2026-05-22
 
 ### Fixed
