@@ -5,20 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.5] - 2026-05-22
+## [0.4.0] - 2026-05-22
+
+### Added
+
+- **SSE streaming TTS** — new `SSEChunkedStream` class using `POST /api/v1/tts/sse` for lower-latency chunked synthesis with proper per-chunk WAV header stripping.
+- **`synthesize_method` parameter** on `TTS` — choose `"rest"` (default), `"sse"`, or `"websocket"` to control which endpoint `synthesize()` uses.
+- **WebSocket WAV fix** — `SynthesizeStream` now strips per-chunk WAV headers from WebSocket audio, producing correct PCM output for the LiveKit pipeline.
+
+### Fixed
+
+- **`_mark_started()` placement** — moved from before WebSocket connection to after the request body is sent, aligning with the convention used by all other LiveKit TTS plugins for accurate TTFB metrics.
 
 ### Removed
 
-- **`vachana-voice-v2` support** — all legacy v2 voices (`sia`, `raju`, `kanika`, `nikita`, `ravan`, `simran`, `karan`, `neha`) removed.
+- **`vachana-voice-v2` support** — all legacy v2 voices removed.
 - **Language-specific v3 voices** — removed 320 language-specific voices.
-- `LEGACY_V2_VOICES` and `V3_VOICES` sets removed.
 
 ### Changed
 
 - `SUPPORTED_VOICES` now contains only 6 voices: `Karan`, `Simran`, `Nara`, `Riya`, `Viraj`, `Raju`.
 - `GnaniTTSVoices` type narrowed to the 6 supported voices.
+- `streaming` capability set to `True` (was `False` in standalone package).
 - TTS languages reduced to 10: Assamese, Bengali, English, Hindi, Kannada, Malayalam, Marathi, Odia, Tamil, Telugu.
-- Minimum `gnani-vachana` dependency bumped to `>=0.3.5`.
+- Minimum `gnani-vachana` dependency bumped to `>=0.4.0`.
 
 ## [0.3.0] - 2026-05-21
 
@@ -53,7 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LiveKit Agents `Plugin.register_plugin()` integration for automatic discovery.
 - Built on top of the [`gnani-vachana`](https://pypi.org/project/gnani-vachana/) core SDK.
 
-[0.3.5]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.3.5
+[0.4.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.4.0
 [0.3.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.3.0
 [0.2.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.1.0
