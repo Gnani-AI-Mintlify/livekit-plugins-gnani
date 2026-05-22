@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.2] - 2026-05-22
+## [0.3.5] - 2026-05-22
 
 ### Removed
 
@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `SUPPORTED_VOICES` now contains only 6 voices: `Karan`, `Simran`, `Nara`, `Riya`, `Viraj`, `Raju`.
 - `GnaniTTSVoices` type narrowed to the 6 supported voices.
 - TTS languages reduced to 10: Assamese, Bengali, English, Hindi, Kannada, Malayalam, Marathi, Odia, Tamil, Telugu.
-- Minimum `gnani-vachana` dependency bumped to `>=0.3.1`.
+- Minimum `gnani-vachana` dependency bumped to `>=0.3.5`.
 
 ## [0.3.0] - 2026-05-21
 
@@ -53,7 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LiveKit Agents `Plugin.register_plugin()` integration for automatic discovery.
 - Built on top of the [`gnani-vachana`](https://pypi.org/project/gnani-vachana/) core SDK.
 
-[0.3.2]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.3.2
+[0.3.5]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.3.5
 [0.3.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.3.0
 [0.2.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.2.0
 [0.1.0]: https://github.com/Gnani-AI-Mintlify/livekit-plugins-gnani/releases/tag/v0.1.0
