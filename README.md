@@ -5,7 +5,7 @@
 
 [LiveKit Agents](https://github.com/livekit/agents) plugin for **[Gnani Vachana](https://gnani.ai/)** — high-accuracy Speech-to-Text and low-latency Text-to-Speech for Indian languages.
 
-> **Vachana** is a production-ready speech AI platform by [Gnani.ai](https://gnani.ai) supporting 22+ Indian languages with 250+ voices, real-time streaming, multilingual transcription, and code-switching capabilities.
+> **Vachana** is a production-ready speech AI platform by [Gnani.ai](https://gnani.ai) supporting 10+ Indian languages with 6 voices, real-time streaming, multilingual transcription, and code-switching capabilities.
 
 ## Installation
 
@@ -65,7 +65,7 @@ tts = TTS(voice="Karan")
 
 - **Chunked synthesis** — REST API for single-request audio generation
 - **Real-time streaming** — WebSocket API for low-latency streaming synthesis
-- **250+ voices** — language-specific voices across 22 Indian languages (e.g. Karan, Simran, Riya, Aarav, Priya, and many more)
+- **6 voices** — Karan, Simran, Nara, Riya, Viraj, Raju
 - **Model** — `vachana-voice-v3` with voice cloning support
 - **Configurable output** — sample rate (8000–44100), encoding (linear_pcm, oggopus), container (raw, mp3, wav, mulaw, ogg)
 
@@ -92,76 +92,33 @@ Plus streaming-only experimental: `en-hi-IN-latn` (Hinglish), `en-hi-in-cm` (cod
 
 ---
 
-### TTS Languages (Text-to-Speech) — 22 languages
+### TTS Languages (Text-to-Speech) — 10 languages
 
 TTS uses ISO 639 language codes (e.g. `hi`, `bn`). Pass these via the `language` parameter.
 
-| Language   | Code  | Sample Voices               |
-|------------|-------|-----------------------------|
-| Assamese   | `as`  | Priya, Arjun                |
-| Bengali    | `bn`  | Ananya, Abhik               |
-| Bodo       | `brx` | Anamika, Anil               |
-| Dogri      | `doi` | Asha, Ajay                  |
-| Gujarati   | `gu`  | Avani, Akshay               |
-| Hindi      | `hi`  | Aarav, Deepak               |
-| Kannada    | `kn`  | Anitha, Aditya              |
-| Kashmiri   | `ks`  | Aafreen, Altaf              |
-| Konkani    | `kok` | Alka, Agnelo                |
-| Maithili   | `mai` | Archana, Amaresh            |
-| Malayalam  | `ml`  | Ambika, Abhilash            |
-| Manipuri   | `mni` | Achouba, Dinamani           |
-| Marathi    | `mr`  | Aparna, Amol                |
-| Nepali     | `ne`  | Anita, Amar                 |
-| Odia       | `or`  | Anuradha, Asutosh           |
-| Punjabi    | `pa`  | Amandeep, Amarjit           |
-| Sanskrit   | `sa`  | Akshara, Achyut             |
-| Santhali   | `sat` | Arjun_S, Birsa              |
-| Sindhi     | `sd`  | Ameena, Bhagwanti           |
-| Tamil      | `ta`  | Abinaya, Anbarasan          |
-| Telugu     | `te`  | Alekhya, Adithya            |
-| Urdu       | `ur`  | Aiza, Asad                  |
+| Language   | Code  |
+|------------|-------|
+| Assamese   | `as`  |
+| Bengali    | `bn`  |
+| English    | `en`  |
+| Hindi      | `hi`  |
+| Kannada    | `kn`  |
+| Malayalam  | `ml`  |
+| Marathi    | `mr`  |
+| Odia       | `or`  |
+| Tamil      | `ta`  |
+| Telugu     | `te`  |
 
-## Available Voices (Sample)
+## Available Voices
 
-The TTS API supports 250+ voices across all supported languages. Here are some primary voices:
-
-| Voice   | ID        | Language    |
-|---------|-----------|-------------|
-| Karan   | `Karan`   | Primary     |
-| Simran  | `Simran`  | Primary     |
-| Nara    | `Nara`    | Primary     |
-| Riya    | `Riya`    | Primary     |
-| Viraj   | `Viraj`   | Primary     |
-| Raju    | `Raju`    | Primary     |
-| Aarav   | `Aarav`   | Hindi       |
-| Priya   | `Priya`   | Assamese    |
-| Ananya  | `Ananya`  | Bengali     |
-| Avani   | `Avani`   | Gujarati    |
-| Anitha  | `Anitha`  | Kannada     |
-| Ambika  | `Ambika`  | Malayalam   |
-| Aparna  | `Aparna`  | Marathi     |
-| Abinaya | `Abinaya` | Tamil       |
-| Alekhya | `Alekhya` | Telugu      |
-| Aiza    | `Aiza`    | Urdu        |
-
-Each language has 8–16 dedicated voices (male and female). Use `SUPPORTED_VOICES` from the package for the full list.
-
-### Legacy v2 Voices
-
-The following lowercase voices from `vachana-voice-v2` are still supported for backward compatibility:
-
-| Voice   | ID        | Model           |
-|---------|-----------|-----------------|
-| Sia     | `sia`     | vachana-voice-v2 |
-| Raju    | `raju`    | vachana-voice-v2 |
-| Kanika  | `kanika`  | vachana-voice-v2 |
-| Nikita  | `nikita`  | vachana-voice-v2 |
-| Ravan   | `ravan`   | vachana-voice-v2 |
-| Simran  | `simran`  | vachana-voice-v2 |
-| Karan   | `karan`   | vachana-voice-v2 |
-| Neha    | `neha`    | vachana-voice-v2 |
-
-> **Note:** Casing matters! `"karan"` (lowercase) uses the old v2 model, while `"Karan"` (capitalized) uses the new v3 model.
+| Voice   | ID        | Gender | Description              |
+|---------|-----------|--------|--------------------------|
+| Karan   | `Karan`   | Male   | Bold, Trustworthy        |
+| Simran  | `Simran`  | Female | Confident, Bright        |
+| Nara    | `Nara`    | Female | Gentle, Expressive       |
+| Riya    | `Riya`    | Female | Cheerful, Energetic      |
+| Viraj   | `Viraj`   | Male   | Commanding, Dynamic      |
+| Raju    | `Raju`    | Male   | Grounded, Conversational |
 
 ## Architecture
 
