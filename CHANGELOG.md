@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-05-22
+
+### Fixed
+
+- **SynthesizeStream mime_type** — `SynthesizeStream` now declares `mime_type="audio/pcm"` instead of `"audio/wav"`, matching the actual stripped-PCM data it emits. Prevents `AudioEmitter` from routing to the wrong decoder.
+- **SSE parser** — restored missing `json.loads(buf)` / `JSONDecodeError` handling in `SSEChunkedStream`, which was silently broken (agents fork only).
+
 ## [0.4.1] - 2026-05-22
 
 ### Added
