@@ -19,14 +19,21 @@ This will also install the [`gnani-vachana`](https://pypi.org/project/gnani-vach
 
 You need a Gnani API key. Email **[speechstack@gnani.ai](mailto:speechstack@gnani.ai)** to get started — all new accounts receive free credits, no credit card required.
 
-Set your credentials as environment variables:
+### Authentication
+
+All APIs require a single API key — no `organization_id` or `user_id` needed.
+
+**Option 1 — Environment variable (recommended):**
 
 ```bash
 export GNANI_API_KEY="your-api-key"
+```
 
-# For REST STT only (optional):
-export GNANI_ORGANIZATION_ID="your-org-id"
-export GNANI_USER_ID="your-user-id"
+**Option 2 — Constructor argument:**
+
+```python
+stt = STT(api_key="your-api-key", language="hi-IN")
+tts = TTS(api_key="your-api-key", voice="Karan")
 ```
 
 ## Quick Start
@@ -67,8 +74,8 @@ regardless of this setting.
 
 - **Batch recognition** — REST API (`POST /stt/v3`) for file-based transcription
 - **Real-time streaming** — WebSocket API for live audio transcription with VAD
-- **23 Indian languages** — Assamese, Bengali, Bodo, Dogri, English (India), Gujarati, Hindi, Kannada, Kashmiri, Konkani, Maithili, Malayalam, Manipuri, Marathi, Nepali, Odia, Punjabi, Sanskrit, Santhali, Sindhi, Tamil, Telugu, Urdu
-- **Code-switching** — Hinglish (en-hi-IN-latn) and Hindi-English mixed (en-hi-in-cm) for streaming
+- **10+ Indian languages** — see [supported language codes](https://docs.inya.ai/vachana/STT/stt-websocket#supported-languages)
+- **Code-switching** — supports multilingual and code-mixed audio
 - **Sample rates** — 8 kHz and 16 kHz
 
 ### TTS
@@ -82,43 +89,20 @@ regardless of this setting.
 
 ## Supported Languages
 
-### STT Languages (Speech-to-Text) — 10 languages
+### STT Languages (Speech-to-Text)
 
-STT uses BCP-47 locale codes (e.g. `hi-IN`):
+STT uses BCP-47 locale codes (e.g. `hi-IN`). For the full list of supported languages, see:
 
-| Language        | Code      |
-|-----------------|-----------|
-| English (India) | `en-IN`   |
-| Hindi           | `hi-IN`   |
-| Gujarati        | `gu-IN`   |
-| Tamil           | `ta-IN`   |
-| Kannada         | `kn-IN`   |
-| Telugu          | `te-IN`   |
-| Marathi         | `mr-IN`   |
-| Bengali         | `bn-IN`   |
-| Malayalam       | `ml-IN`   |
-| Punjabi         | `pa-IN`   |
-
-Plus streaming-only experimental: `en-hi-IN-latn` (Hinglish), `en-hi-in-cm` (code-mixed).
+- **[STT REST — Supported Languages](https://docs.inya.ai/vachana/STT/speech-to-text#supported-languages)**
+- **[STT Realtime — Supported Languages](https://docs.inya.ai/vachana/STT/stt-websocket#supported-languages)**
 
 ---
 
-### TTS Languages (Text-to-Speech) — 10 languages
+### TTS Languages (Text-to-Speech)
 
 TTS uses ISO 639 language codes (e.g. `hi`, `bn`). Pass these via the `language` parameter.
 
-| Language   | Code  |
-|------------|-------|
-| Assamese   | `as`  |
-| Bengali    | `bn`  |
-| English    | `en`  |
-| Hindi      | `hi`  |
-| Kannada    | `kn`  |
-| Malayalam  | `ml`  |
-| Marathi    | `mr`  |
-| Odia       | `or`  |
-| Tamil      | `ta`  |
-| Telugu     | `te`  |
+For the full list of supported languages, see **[TTS — Supported Languages](https://docs.inya.ai/vachana/TTS/tts-inference#supported-languages)**.
 
 ## Available Voices
 
@@ -134,12 +118,12 @@ TTS uses ISO 639 language codes (e.g. `hi`, `bn`). Pass these via the `language`
 ## Architecture
 
 ```
-gnani-vachana (>=0.4.0)   <- Core SDK (REST, WebSocket, SSE clients, voice/language constants)
+gnani-vachana (>=0.4.3)   <- Core SDK (REST, WebSocket, SSE clients; single api_key auth)
     |
 livekit-plugins-gnani     <- This package (LiveKit Agents adapter)
 ```
 
-This plugin is a thin adapter that wraps the `gnani-vachana` SDK into LiveKit's `stt.STT` and `tts.TTS` base classes. Voice lists, language constants, and model definitions are shared with the core SDK.
+This plugin is a thin adapter that wraps the `gnani-vachana` SDK into LiveKit's `stt.STT` and `tts.TTS` base classes. Voice lists, language constants, and model definitions are shared with the core SDK. Authentication uses a single `api_key` passed via the `X-API-Key-ID` header.
 
 ## Documentation
 

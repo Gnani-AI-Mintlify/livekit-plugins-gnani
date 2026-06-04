@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4] - 2026-05-31
+
+### Removed
+
+- **`organization_id` and `user_id` parameters** — removed from both `STT` and `TTS` classes. Authentication now requires only `api_key` (via constructor or `GNANI_API_KEY` env var). The `X-Organization-ID` and `X-API-User-ID` headers are no longer sent. Only `X-API-Key-ID` is used for authentication across all endpoints.
+
+### Changed
+
+- Minimum `gnani-vachana` dependency bumped to `>=0.4.3`.
+
 ## [0.4.3] - 2026-05-22
 
 ### Fixed
