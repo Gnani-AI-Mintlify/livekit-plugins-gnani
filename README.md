@@ -77,6 +77,7 @@ regardless of this setting.
 - **10+ Indian languages** — see [supported language codes](https://docs.gnani.ai/api/STT/stt-websocket#supported-languages)
 - **Code-switching** — supports multilingual and code-mixed audio
 - **Sample rates** — 8 kHz and 16 kHz
+- **ITN support** — set `format="transcribe"` to enable Inverse Text Normalization; use `itn_native_numerals=True` for native-script digits. Both parameters are forwarded over WebSocket via `x-format` and `itn_native_numerals` connection headers.
 
 #### Streaming PCM Specification
 
@@ -132,7 +133,7 @@ For the full list of supported languages, see **[TTS — Supported Languages](ht
 ## Architecture
 
 ```
-gnani-vachana (>=0.4.4)   <- Core SDK (REST, WebSocket, SSE clients; single api_key auth)
+gnani-vachana (>=0.5.1)   <- Core SDK (REST, WebSocket, SSE clients; single api_key auth)
     |
 livekit-plugins-gnani     <- This package (LiveKit Agents adapter)
 ```
