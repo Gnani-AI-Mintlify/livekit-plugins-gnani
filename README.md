@@ -33,7 +33,7 @@ export GNANI_API_KEY="your-api-key"
 
 ```python
 stt = STT(api_key="your-api-key", language="hi-IN")
-tts = TTS(api_key="your-api-key", voice="Karan")
+tts = TTS(api_key="your-api-key")
 ```
 
 ## Quick Start
@@ -72,11 +72,26 @@ regardless of this setting.
 
 ### STT (Prisma)
 
-- **Batch recognition** — REST API (`POST /stt/v3`) for file-based transcription
-- **Real-time streaming** — WebSocket API for live audio transcription with VAD
+- **REST recognition** — REST API (`POST /stt/v3`) for file-based transcription
+- **Real-time streaming** — WebSocket API (`wss://api.vachana.ai/stt/v3/stream`) for live audio transcription with VAD
 - **10+ Indian languages** — see [supported language codes](https://docs.gnani.ai/api/STT/stt-websocket#supported-languages)
 - **Code-switching** — supports multilingual and code-mixed audio
 - **Sample rates** — 8 kHz and 16 kHz
+
+#### Streaming PCM Specification
+
+All streaming audio must be sent as **raw PCM binary frames** — no container format (WAV, MP3) mid-stream.
+
+| Property          | 16 kHz                                    | 8 kHz                                     |
+|-------------------|-------------------------------------------|-------------------------------------------|
+| Encoding          | PCM signed 16-bit little-endian           | PCM signed 16-bit little-endian           |
+| Sample Rate       | 16,000 Hz                                 | 8,000 Hz                                  |
+| Channels          | 1 (mono)                                  | 1 (mono)                                  |
+| Samples per chunk | 512                                       | 512                                       |
+| **Bytes per frame** | **1,024 bytes** (512 samples × 2 bytes) | **1,024 bytes** (512 samples × 2 bytes)   |
+| Frame duration    | 32 ms                                     | 64 ms                                     |
+
+Frames must be sent at **real-time cadence**. See **[STT Realtime — PCM Specification](https://docs.gnani.ai/api/STT/stt-websocket#pcm-specification)** for full details.
 
 ### TTS (Timbre)
 
@@ -100,7 +115,6 @@ Prisma uses BCP-47 locale codes (e.g. `hi-IN`). For the full list of supported l
 
 ### TTS Languages (Timbre)
 
-Timbre uses ISO 639 language codes (e.g. `hi`, `bn`). Pass these via the `language` parameter.
 
 For the full list of supported languages, see **[TTS — Supported Languages](https://docs.gnani.ai/api/TTS/tts-inference#supported-languages)**.
 
