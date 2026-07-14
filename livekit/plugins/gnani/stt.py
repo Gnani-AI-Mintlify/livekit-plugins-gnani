@@ -77,11 +77,58 @@ STREAM_SUPPORTED_LANGUAGES: set[str] = {
     "pa-IN",
     "ta-IN",
     "te-IN",
+    "en-hi-IN-latn",
+    "en-hi-in-cm",
 }
+
+REST_SINGLE_LANGUAGES: set[str] = {code for code in SUPPORTED_LANGUAGES if "," not in code}
 
 SAMPLE_RATE_16K = 16000
 SAMPLE_RATE_8K = 8000
+SAMPLE_RATE_44K = 44100
+SAMPLE_RATE_48K = 48000
+STREAM_SUPPORTED_SAMPLE_RATES = (
+    SAMPLE_RATE_8K,
+    SAMPLE_RATE_16K,
+    SAMPLE_RATE_44K,
+    SAMPLE_RATE_48K,
+)
 STREAM_CHUNK_BYTES = 1024
+
+
+def _validate_rest_language_code(language_code: str) -> None:
+    """Validate a REST language_code.
+
+    Accepts a single supported code, a pre-defined combo from
+    ``SUPPORTED_LANGUAGES``, or any comma-separated combination of supported
+    single codes (e.g. ``"en-IN,ta-IN"``) to enable auto-detection.
+    """
+    if language_code in SUPPORTED_LANGUAGES:
+        return
+    parts = [p.strip() for p in language_code.split(",") if p.strip()]
+    if len(parts) >= 2 and all(p in REST_SINGLE_LANGUAGES for p in parts):
+        return
+    raise ValueError(
+        f"Unsupported language_code '{language_code}'. "
+        f"Choose from: {', '.join(sorted(REST_SINGLE_LANGUAGES))} "
+        f"or a comma-separated combination of these for auto-detection."
+    )
+
+
+def _ws_header_kwargs(headers: dict[str, str]) -> dict[str, Any]:
+    """Return the correct ``connect()`` header kwarg for the installed websockets.
+
+    websockets >= 13 renamed ``extra_headers`` to ``additional_headers``. Support
+    both so WebSocket STT works when another dependency pins websockets < 13.
+    """
+    import websockets
+
+    try:
+        major = int(websockets.__version__.split(".", 1)[0])
+    except (AttributeError, ValueError):
+        major = 13
+    key = "additional_headers" if major >= 13 else "extra_headers"
+    return {key: headers}
 
 
 @dataclass
@@ -120,7 +167,7 @@ class STT(stt.STT):
     Args:
         language: BCP-47 language code (e.g. "hi-IN", "en-IN").
         api_key: Gnani API key (falls back to GNANI_API_KEY env var).
-        sample_rate: Audio sample rate for streaming (8000 or 16000).
+        sample_rate: Audio sample rate for streaming (8000, 16000, 44100, or 48000).
         base_url: Vachana API base URL.
         preferred_language: Force single-language model for this code.
         format: "verbatim" (default) or "transcribe" (enables ITN).
@@ -156,8 +203,11 @@ class STT(stt.STT):
                 "Provide it directly or set GNANI_API_KEY environment variable."
             )
 
-        if sample_rate not in (SAMPLE_RATE_8K, SAMPLE_RATE_16K):
-            raise ValueError("sample_rate must be 8000 or 16000")
+        if sample_rate not in STREAM_SUPPORTED_SAMPLE_RATES:
+            allowed = ", ".join(str(r) for r in STREAM_SUPPORTED_SAMPLE_RATES)
+            raise ValueError(f"sample_rate must be one of {allowed}, got {sample_rate}")
+
+        _validate_rest_language_code(language)
 
         self._opts = GnaniSTTOptions(
             api_key=self._api_key,
@@ -340,7 +390,7 @@ class SpeechStream(stt.RecognizeStream):
         try:
             async with websockets.connect(
                 ws_url,
-                additional_headers=headers,
+                **_ws_header_kwargs(headers),
                 ping_interval=20,
                 ping_timeout=20,
                 close_timeout=10,

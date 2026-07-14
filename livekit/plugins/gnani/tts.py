@@ -36,15 +36,19 @@ from .log import logger
 GNANI_TTS_BASE_URL = "https://api.vachana.ai"
 
 GnaniTTSVoices = Literal[
-    "Karan",
-    "Simran",
-    "Nara",
-    "Riya",
-    "Viraj",
-    "Raju",
+    "Pranav",
+    "Kaveri",
+    "Shubhra",
+    "Deepak",
 ]
+"""See https://docs.gnani.ai/api/TTS/tts-sse#available-voices"""
 
-SUPPORTED_VOICES: set[str] = {"Karan", "Simran", "Nara", "Riya", "Viraj", "Raju"}
+SUPPORTED_VOICES: set[str] = {
+    "Pranav",
+    "Kaveri",
+    "Shubhra",
+    "Deepak",
+}
 
 GnaniTTSEncodings = Literal["linear_pcm", "oggopus"]
 GnaniTTSContainers = Literal["raw", "mp3", "wav", "mulaw", "ogg"]
@@ -56,10 +60,26 @@ SUPPORTED_SAMPLE_RATES = (8000, 16000, 22050, 44100)
 _WAV_HEADER_SIZE = 44
 
 
+def _ws_header_kwargs(headers: dict[str, str]) -> dict[str, Any]:
+    """Return the correct ``connect()`` header kwarg for the installed websockets.
+
+    websockets >= 13 renamed ``extra_headers`` to ``additional_headers``. Support
+    both so WebSocket TTS works when another dependency pins websockets < 13.
+    """
+    import websockets
+
+    try:
+        major = int(websockets.__version__.split(".", 1)[0])
+    except (AttributeError, ValueError):
+        major = 13
+    key = "additional_headers" if major >= 13 else "extra_headers"
+    return {key: headers}
+
+
 @dataclass
 class GnaniTTSOptions:
     api_key: str
-    voice: str = "Karan"
+    voice: str = "Pranav"
     model: str = "vachana-voice-v3"
     sample_rate: int = 16000
     encoding: str = "linear_pcm"
@@ -94,7 +114,7 @@ class TTS(tts.TTS):
     Supports REST, SSE, and WebSocket synthesis modes.
 
     Args:
-        voice: Voice to use for synthesis (Karan, Simran, Riya, etc.).
+        voice: Voice to use for synthesis (see https://docs.gnani.ai/api/TTS/tts-sse#available-voices).
         model: TTS model name (default: vachana-voice-v3).
         sample_rate: Audio output sample rate (8000-44100).
         encoding: Audio encoding (linear_pcm or oggopus).
@@ -107,7 +127,7 @@ class TTS(tts.TTS):
     def __init__(
         self,
         *,
-        voice: GnaniTTSVoices | str = "Karan",
+        voice: GnaniTTSVoices | str = "Pranav",
         model: str = "vachana-voice-v3",
         sample_rate: int = 16000,
         num_channels: int = 1,
@@ -430,7 +450,7 @@ class WebSocketChunkedStream(tts.ChunkedStream):
             ws_url = self._build_ws_url()
             async with websockets.connect(
                 ws_url,
-                additional_headers=_build_headers(self._opts),
+                **_ws_header_kwargs(_build_headers(self._opts)),
                 ping_interval=20,
                 ping_timeout=20,
                 close_timeout=10,
@@ -541,7 +561,7 @@ class SynthesizeStream(tts.SynthesizeStream):
             ws_url = self._build_ws_url()
             async with websockets.connect(
                 ws_url,
-                additional_headers=_build_headers(self._opts),
+                **_ws_header_kwargs(_build_headers(self._opts)),
                 ping_interval=20,
                 ping_timeout=20,
                 close_timeout=10,

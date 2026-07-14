@@ -13,7 +13,13 @@
 pip install livekit-plugins-gnani
 ```
 
-This will also install the [`gnani-vachana`](https://pypi.org/project/gnani-vachana/) core SDK as a dependency.
+Or with [uv](https://docs.astral.sh/uv/):
+
+```bash
+uv add livekit-plugins-gnani
+```
+
+This will also install the [`gnani`](https://pypi.org/project/gnani/) core SDK as a dependency.
 
 ## Prerequisites
 
@@ -54,13 +60,13 @@ stt = STT(language="hi-IN")
 from livekit.plugins.gnani import TTS
 
 # REST (default) — single-request batch synthesis
-tts = TTS(voice="Karan")
+tts = TTS(voice="Pranav")
 
 # SSE — streaming via Server-Sent Events (lower latency)
-tts = TTS(voice="Karan", synthesize_method="sse")
+tts = TTS(voice="Pranav", synthesize_method="sse")
 
 # WebSocket — real-time streaming via stream() (lowest latency)
-tts = TTS(voice="Karan", synthesize_method="websocket")
+tts = TTS(voice="Pranav", synthesize_method="websocket")
 ```
 
 All three modes work with the standard LiveKit voice agent pipeline.
@@ -99,7 +105,7 @@ Frames must be sent at **real-time cadence**. See **[STT Realtime — PCM Specif
 - **REST synthesis** — single-request batch audio generation (`synthesize_method="rest"`)
 - **SSE streaming** — lower-latency chunked synthesis via Server-Sent Events (`synthesize_method="sse"`)
 - **WebSocket synthesis** — lowest-latency synthesis via `synthesize_method="websocket"` or the `stream()` method
-- **6 voices** — Karan, Simran, Nara, Riya, Viraj, Raju
+- **4 voices** — Pranav, Kaveri, Shubhra, Deepak (see [Available Voices](https://docs.gnani.ai/api/TTS/tts-sse#available-voices))
 - **Model** — Timbre (`vachana-voice-v3`) with voice cloning support
 - **Configurable output** — sample rate (8000–44100), encoding (linear_pcm, oggopus), container (raw, mp3, wav, mulaw, ogg)
 
@@ -121,30 +127,30 @@ For the full list of supported languages, see **[TTS — Supported Languages](ht
 
 ## Available Voices
 
+See the [official voice list](https://docs.gnani.ai/api/TTS/tts-sse#available-voices) for the latest supported voices.
+
 | Voice   | ID        | Gender | Description              |
 |---------|-----------|--------|--------------------------|
-| Karan   | `Karan`   | Male   | Bold, Trustworthy        |
-| Simran  | `Simran`  | Female | Confident, Bright        |
-| Nara    | `Nara`    | Female | Gentle, Expressive       |
-| Riya    | `Riya`    | Female | Cheerful, Energetic      |
-| Viraj   | `Viraj`   | Male   | Commanding, Dynamic      |
-| Raju    | `Raju`    | Male   | Grounded, Conversational |
+| Pranav  | `Pranav`  | Male   | Bold, Trustworthy        |
+| Kaveri  | `Kaveri`  | Female | Confident, Bright        |
+| Shubhra | `Shubhra` | Female | Gentle, Expressive       |
+| Deepak  | `Deepak`  | Male   | Grounded, Conversational |
 
 ## Architecture
 
 ```
-gnani-vachana (>=0.5.1)   <- Core SDK (REST, WebSocket, SSE clients; single api_key auth)
+gnani (>=0.6.0)           <- Core SDK (REST, WebSocket, SSE clients; single api_key auth)
     |
 livekit-plugins-gnani     <- This package (LiveKit Agents adapter)
 ```
 
-This plugin is a thin adapter that wraps the `gnani-vachana` SDK into LiveKit's `stt.STT` and `tts.TTS` base classes. It uses the **Prisma** model for speech-to-text and the **Timbre** model for text-to-speech. Voice lists, language constants, and model definitions are shared with the core SDK. Authentication uses a single `api_key` passed via the `X-API-Key-ID` header.
+This plugin is a thin adapter that wraps the `gnani` SDK into LiveKit's `stt.STT` and `tts.TTS` base classes. It uses the **Prisma** model for speech-to-text and the **Timbre** model for text-to-speech. Voice lists, language constants, and model definitions are shared with the core SDK. Authentication uses a single `api_key` passed via the `X-API-Key-ID` header.
 
 ## Documentation
 
 - [Gnani API Docs](https://docs.gnani.ai/)
 - [LiveKit Agents Docs](https://docs.livekit.io/agents/)
-- [gnani-vachana SDK](https://pypi.org/project/gnani-vachana/)
+- [gnani SDK](https://pypi.org/project/gnani/)
 
 ## License
 

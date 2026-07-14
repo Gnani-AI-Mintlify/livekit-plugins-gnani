@@ -1,3 +1,33 @@
+# ---------------------------------------------------------------------------
+# Repo policy: only `livekit/` is versioned on GitHub (same as the PyPI wheel).
+# Everything else is local dev tooling or publish scaffolding listed below.
+# ---------------------------------------------------------------------------
+
+# Ignore everything at repo root by default
+/*
+
+# Published package (the only product code on GitHub / PyPI)
+!/livekit/
+!/livekit/**
+
+!pyproject.toml
+!README.md
+!LICENSE
+!CHANGELOG.md
+!.gitignore
+!.github/
+!.github/workflows/
+!.github/workflows/workflow.yml
+
+# --- Local dev only ---
+tests/
+scripts/
+Makefile
+DEVELOPMENT.md
+tests/output/
+.github/workflows/ci.yml
+
+# --- Standard Python / tooling artifacts ---
 __pycache__/
 *.py[cod]
 *$py.class
@@ -15,9 +45,7 @@ env/
 
 .env
 .env.*
-*.ini
-*.cfg
-!pyproject.toml
+!.env.example
 
 *.log
 .mypy_cache/
@@ -34,6 +62,3 @@ htmlcov/
 *~
 .DS_Store
 Thumbs.db
-
-# Test output
-tests/output/
