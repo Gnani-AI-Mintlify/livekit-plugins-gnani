@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Bumped `gnani-vachana` dependency to `>=0.7.3,<1.0`** (from `>=0.7.1`), picking up the `uv`-based dev workflow and TTS type-casting fixes in the core SDK.
+- **`websockets` lower bound relaxed to `>=12.0`** to align with the core SDK and support environments that pin `websockets < 13`.
+- **WebSocket header compatibility** — STT and TTS WebSocket connections use `_ws_header_kwargs()` so `additional_headers` (websockets >= 13) and `extra_headers` (< 13) are selected automatically, matching `gnani-vachana` 0.7.2+.
+- **STT streaming sample rates** — `STT` now accepts `44100` and `48000` Hz in addition to `8000` and `16000`, matching the documented `x-sample-rate` values.
+- **STT REST language auto-detection** — `STT` now accepts any comma-separated combination of supported single language codes (e.g. `"en-IN,ta-IN"`) to enable server-side auto-detection.
+- **STT streaming languages** — added experimental Hinglish codes `en-hi-IN-latn` and `en-hi-in-cm` to `STREAM_SUPPORTED_LANGUAGES`.
+- **Local development uses [uv](https://docs.astral.sh/uv/)** — `scripts/setup.sh` creates `.venv` with `uv venv` and installs via `uv sync --extra dev`. `Makefile`, `release.sh`, and CI workflows use `uv run`. `uv.lock` is generated locally for reproducible installs.
+- **Bumped `gnani` SDK dependency to `>=0.7.1,<1.0`** (from `>=0.6.0,<1.0`), picking up the `websockets` 12.x compatibility fix and the additional STT streaming sample rates (44100, 48000 Hz).
+- **PyPI publish** — the publish workflow now also triggers on `v*.*.*` tag pushes (and `workflow_dispatch`), validates that the tag matches the `pyproject.toml` version, and runs `twine check` on the built distribution before uploading.
+
+### Added
+
+- **CI workflow** — GitHub Actions `CI` workflow (`.github/workflows/ci.yml`) runs ruff (lint + format check), mypy (advisory), and the test suite across Python 3.10–3.13 on every push and pull request.
+- **Test suite is now committed** — `tests/`, `Makefile`, and `scripts/` are no longer gitignored, so the full unit + live integration suite can be run in CI and verified independently (`git clone` → `pip install -e ".[dev]"` → `pytest tests/`). The published wheel still ships only `livekit/`, so tests never reach `pip install` users.
+- **`DEVELOPMENT.md`** — development & release runbook covering setup, testing, and the tag-based PyPI publish flow.
+- **Versioning & release scripts** — `scripts/bump_version.py` (keeps `pyproject.toml` and `livekit/plugins/gnani/version.py` in sync) and `scripts/release.sh` (test → lint → bump → changelog → commit → tag → push).
+- **`build`, `twine`** added to the `dev` optional dependencies; `make build` target builds the distribution and runs `twine check`. New `make bump-*` / `release-*` targets.
+
+### Fixed
+
+- **TTS `oggopus` live test** — updated the `oggopus` audio-config test to use `container="raw"` (the API rejects `oggopus` with `container="ogg"`).
+
+## [0.5.1] - 2026-07-02
+
+### Changed
+
+- **TTS voices** — updated to 4 official voices: Pranav, Kaveri, Shubhra, Deepak. Removed legacy voices (Karan, Simran, Nara, Riya, Viraj, Raju). Default voice changed from `"Karan"` to `"Pranav"`. See [Available Voices](https://docs.gnani.ai/api/TTS/tts-sse#available-voices).
+
+## [0.5.0] - 2026-06-23
+
+### Removed
+
+- **`language` parameter from TTS** — removed `language` from `GnaniTTSOptions`, `TTS.__init__()`, and `update_options()`. TTS no longer accepts a language parameter. The `language` field is no longer sent in WebSocket request bodies.
+
+### Changed
+
+- **STT documentation** — clarified that only REST and Streaming (WebSocket) modes are integrated; no batch STT. Added PCM specification details with link to [STT Realtime — PCM Specification](https://docs.gnani.ai/api/STT/stt-websocket#pcm-specification).
+
+## [0.4.5] - 2026-06-15
+
+### Changed 
+
+- Url of the gnani documentation.
+
+
+## [0.4.4] - 2026-05-31
+
+### Removed
+
+- **`organization_id` and `user_id` parameters** — removed from both `STT` and `TTS` classes. Authentication now requires only `api_key` (via constructor or `GNANI_API_KEY` env var). The `X-Organization-ID` and `X-API-User-ID` headers are no longer sent. Only `X-API-Key-ID` is used for authentication across all endpoints.
+
+### Changed
+
+- Minimum `gnani-vachana` dependency bumped to `>=0.4.3`.
+
 ## [0.4.3] - 2026-05-22
 
 ### Fixed
