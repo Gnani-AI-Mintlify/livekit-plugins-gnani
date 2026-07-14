@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **README** — point API key setup to [Gnani APIs](https://app.gnani.ai/voice) instead of email instructions.
+
 - **Bumped `gnani-vachana` dependency to `>=0.7.3,<1.0`** (from `>=0.7.1`), picking up the `uv`-based dev workflow and TTS type-casting fixes in the core SDK.
 - **`websockets` lower bound relaxed to `>=12.0`** to align with the core SDK and support environments that pin `websockets < 13`.
 - **WebSocket header compatibility** — STT and TTS WebSocket connections use `_ws_header_kwargs()` so `additional_headers` (websockets >= 13) and `extra_headers` (< 13) are selected automatically, matching `gnani-vachana` 0.7.2+.
