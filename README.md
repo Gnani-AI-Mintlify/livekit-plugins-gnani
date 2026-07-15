@@ -5,7 +5,7 @@
 
 [LiveKit Agents](https://github.com/livekit/agents) plugin for **[Gnani](https://gnani.ai/)** — high-accuracy Speech-to-Text (Prisma) and low-latency Text-to-Speech (Timbre) for Indian languages.
 
->[Gnani.ai](https://gnani.ai) is a production-ready speech AI featuring **Prisma** (STT) and **Timbre** (TTS) models, supporting 10+ Indian languages with 6 voices, real-time streaming, multilingual transcription, and code-switching capabilities.
+>[Gnani.ai](https://gnani.ai) is a production-ready speech AI featuring **Prisma** (STT) and **Timbre** (TTS) models, supporting 10+ Indian languages with 6 voices, real-time streaming, and multilingual transcription.
 
 ## Installation
 
@@ -81,7 +81,6 @@ regardless of this setting.
 - **REST recognition** — REST API (`POST /stt/v3`) for file-based transcription
 - **Real-time streaming** — WebSocket API (`wss://api.vachana.ai/stt/v3/stream`) for live audio transcription with VAD
 - **10+ Indian languages** — see [supported language codes](https://docs.gnani.ai/api/STT/stt-websocket#supported-languages)
-- **Code-switching** — supports multilingual and code-mixed audio
 - **Sample rates** — 8 kHz and 16 kHz
 - **ITN support** — set `format="transcribe"` to enable Inverse Text Normalization; use `itn_native_numerals=True` for native-script digits. Both parameters are forwarded over WebSocket via `x-format` and `itn_native_numerals` connection headers.
 

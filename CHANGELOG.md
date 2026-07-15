@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.3] - 2026-07-14
 
+### Removed
+
+- **Code-switching and auto-detect language modes** — `STT` now accepts only single BCP-47 language codes. Removed comma-separated `language` values and the `preferred_language` parameter.
+
 ### Changed
 
 - **README** — point API key setup to [Gnani APIs](https://app.gnani.ai/voice) instead of email instructions.
@@ -16,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **WebSocket header compatibility** — STT and TTS WebSocket connections use `_ws_header_kwargs()` so `additional_headers` (websockets >= 13) and `extra_headers` (< 13) are selected automatically, matching `gnani-vachana` 0.7.2+.
 - **STT streaming sample rates** — `STT` now accepts `44100` and `48000` Hz in addition to `8000` and `16000`, matching the documented `x-sample-rate` values.
 - **STT REST language auto-detection** — `STT` now accepts any comma-separated combination of supported single language codes (e.g. `"en-IN,ta-IN"`) to enable server-side auto-detection.
-- **STT streaming languages** — added experimental Hinglish codes `en-hi-IN-latn` and `en-hi-in-cm` to `STREAM_SUPPORTED_LANGUAGES`.
 - **Local development uses [uv](https://docs.astral.sh/uv/)** — `scripts/setup.sh` creates `.venv` with `uv venv` and installs via `uv sync --extra dev`. `Makefile`, `release.sh`, and CI workflows use `uv run`. `uv.lock` is generated locally for reproducible installs.
 - **Bumped `gnani` SDK dependency to `>=0.7.1,<1.0`** (from `>=0.6.0,<1.0`), picking up the `websockets` 12.x compatibility fix and the additional STT streaming sample rates (44100, 48000 Hz).
 - **PyPI publish** — the publish workflow now also triggers on `v*.*.*` tag pushes (and `workflow_dispatch`), validates that the tag matches the `pyproject.toml` version, and runs `twine check` on the built distribution before uploading.

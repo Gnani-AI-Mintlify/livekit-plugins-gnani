@@ -49,7 +49,6 @@ GnaniSTTLanguages = Literal[
     "pa-IN",
     "ta-IN",
     "te-IN",
-    "en-IN,hi-IN",
 ]
 
 SUPPORTED_LANGUAGES: set[str] = {
@@ -63,7 +62,6 @@ SUPPORTED_LANGUAGES: set[str] = {
     "pa-IN",
     "ta-IN",
     "te-IN",
-    "en-IN,hi-IN",
 }
 
 STREAM_SUPPORTED_LANGUAGES: set[str] = {
@@ -77,11 +75,21 @@ STREAM_SUPPORTED_LANGUAGES: set[str] = {
     "pa-IN",
     "ta-IN",
     "te-IN",
-    "en-hi-IN-latn",
-    "en-hi-in-cm",
 }
 
-REST_SINGLE_LANGUAGES: set[str] = {code for code in SUPPORTED_LANGUAGES if "," not in code}
+
+def _validate_rest_language_code(language_code: str) -> None:
+    """Validate a REST language_code.
+
+    Accepts a single supported BCP-47 code (e.g. ``"hi-IN"``).
+    """
+    if language_code in SUPPORTED_LANGUAGES:
+        return
+    raise ValueError(
+        f"Unsupported language_code '{language_code}'. "
+        f"Choose from: {', '.join(sorted(SUPPORTED_LANGUAGES))}"
+    )
+
 
 SAMPLE_RATE_16K = 16000
 SAMPLE_RATE_8K = 8000
@@ -94,25 +102,6 @@ STREAM_SUPPORTED_SAMPLE_RATES = (
     SAMPLE_RATE_48K,
 )
 STREAM_CHUNK_BYTES = 1024
-
-
-def _validate_rest_language_code(language_code: str) -> None:
-    """Validate a REST language_code.
-
-    Accepts a single supported code, a pre-defined combo from
-    ``SUPPORTED_LANGUAGES``, or any comma-separated combination of supported
-    single codes (e.g. ``"en-IN,ta-IN"``) to enable auto-detection.
-    """
-    if language_code in SUPPORTED_LANGUAGES:
-        return
-    parts = [p.strip() for p in language_code.split(",") if p.strip()]
-    if len(parts) >= 2 and all(p in REST_SINGLE_LANGUAGES for p in parts):
-        return
-    raise ValueError(
-        f"Unsupported language_code '{language_code}'. "
-        f"Choose from: {', '.join(sorted(REST_SINGLE_LANGUAGES))} "
-        f"or a comma-separated combination of these for auto-detection."
-    )
 
 
 def _ws_header_kwargs(headers: dict[str, str]) -> dict[str, Any]:
@@ -137,7 +126,6 @@ class GnaniSTTOptions:
     language: str
     sample_rate: int = SAMPLE_RATE_16K
     base_url: str = GNANI_STT_BASE_URL
-    preferred_language: str | None = None
     format: str = "verbatim"
     itn_native_numerals: bool = False
 
@@ -169,7 +157,6 @@ class STT(stt.STT):
         api_key: Gnani API key (falls back to GNANI_API_KEY env var).
         sample_rate: Audio sample rate for streaming (8000, 16000, 44100, or 48000).
         base_url: Vachana API base URL.
-        preferred_language: Force single-language model for this code.
         format: "verbatim" (default) or "transcribe" (enables ITN).
         itn_native_numerals: Render digits in native script when format="transcribe".
     """
@@ -181,7 +168,6 @@ class STT(stt.STT):
         api_key: str | None = None,
         sample_rate: int = SAMPLE_RATE_16K,
         base_url: str = GNANI_STT_BASE_URL,
-        preferred_language: str | None = None,
         format: GnaniSTTFormat = "verbatim",
         itn_native_numerals: bool = False,
         **kwargs: Any,
@@ -214,7 +200,6 @@ class STT(stt.STT):
             language=language,
             sample_rate=sample_rate,
             base_url=base_url,
-            preferred_language=preferred_language,
             format=format,
             itn_native_numerals=itn_native_numerals,
         )
@@ -270,8 +255,6 @@ class STT(stt.STT):
         form_data.add_field("language_code", lang)
         form_data.add_field("format", self._opts.format)
 
-        if self._opts.preferred_language is not None:
-            form_data.add_field("preferred_language", self._opts.preferred_language)
         if self._opts.itn_native_numerals:
             form_data.add_field("itn_native_numerals", "true")
 
@@ -382,8 +365,6 @@ class SpeechStream(stt.RecognizeStream):
         }
         if self._opts.format != "verbatim":
             headers["x-format"] = self._opts.format
-        if self._opts.preferred_language is not None:
-            headers["preferred_language"] = self._opts.preferred_language
         if self._opts.itn_native_numerals:
             headers["itn_native_numerals"] = "true"
 
