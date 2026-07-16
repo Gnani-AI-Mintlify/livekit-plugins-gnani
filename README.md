@@ -5,7 +5,7 @@
 
 [LiveKit Agents](https://github.com/livekit/agents) plugin for **[Gnani](https://gnani.ai/)** — high-accuracy Speech-to-Text (Prisma) and low-latency Text-to-Speech (Timbre) for Indian languages.
 
->[Gnani.ai](https://gnani.ai) is a production-ready speech AI featuring **Prisma** (STT) and **Timbre** (TTS) models, supporting 10+ Indian languages with 6 voices, real-time streaming, and multilingual transcription.
+>[Gnani.ai](https://gnani.ai) is a production-ready speech AI featuring **Prisma** (STT) and **Timbre** (TTS) models, supporting 10+ Indian languages with timbre-v2.0 (4 voices) and timbre-v2.5 (42 voices), real-time streaming, and multilingual transcription.
 
 ## Installation
 
@@ -104,9 +104,19 @@ Frames must be sent at **real-time cadence**. See **[STT Realtime — PCM Specif
 - **REST synthesis** — single-request batch audio generation (`synthesize_method="rest"`)
 - **SSE streaming** — lower-latency chunked synthesis via Server-Sent Events (`synthesize_method="sse"`)
 - **WebSocket synthesis** — lowest-latency synthesis via `synthesize_method="websocket"` or the `stream()` method
-- **4 voices** — Pranav, Kaveri, Shubhra, Deepak (see [Available Voices](https://docs.gnani.ai/api/TTS/tts-sse#available-voices))
-- **Model** — Timbre (`vachana-voice-v3`) with voice cloning support
+- **timbre-v2.0** — 4 voices: Pranav, Kaveri, Shubhra, Deepak (see [Available Voices](https://docs.gnani.ai/api/TTS/tts-sse#available-voices))
+- **timbre-v2.5** — 42 voices with `language` parameter for BCP-47 locale control (e.g. `hi-IN`, `en-IN`, `ta-IN`)
 - **Configurable output** — sample rate (8000–44100), encoding (linear_pcm, oggopus), container (raw, mp3, wav, mulaw, ogg)
+
+```python
+from livekit.plugins.gnani import TTS
+
+# timbre-v2.0 (default) — 4 voices
+tts = TTS(voice="Pranav")
+
+# timbre-v2.5 — 42 voices + language
+tts = TTS(model="timbre-v2.5", voice="Nalini", language="hi-IN")
+```
 
 ## Supported Languages
 
@@ -128,12 +138,18 @@ For the full list of supported languages, see **[TTS — Supported Languages](ht
 
 See the [official voice list](https://docs.gnani.ai/api/TTS/tts-sse#available-voices) for the latest supported voices.
 
+### timbre-v2.0 (4 voices)
+
 | Voice   | ID        | Gender | Description              |
 |---------|-----------|--------|--------------------------|
 | Pranav  | `Pranav`  | Male   | Bold, Trustworthy        |
 | Kaveri  | `Kaveri`  | Female | Confident, Bright        |
 | Shubhra | `Shubhra` | Female | Gentle, Expressive       |
 | Deepak  | `Deepak`  | Male   | Grounded, Conversational |
+
+### timbre-v2.5 (42 voices)
+
+The expanded catalog includes voices across Hindi, English, Tamil, Telugu, Kannada, Malayalam, Marathi, Bengali, Gujarati, Punjabi, and Hinglish. Use the `language` parameter to select the target locale (e.g. `language="hi-IN"`).
 
 ## Architecture
 

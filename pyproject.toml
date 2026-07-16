@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "livekit-plugins-gnani"
-version = "0.5.3"
+version = "0.5.4"
 description = "LiveKit Agents plugin for Gnani Vachana speech AI — STT & TTS for Indian languages"
 readme = "README.md"
 license = "Apache-2.0"
@@ -35,7 +35,7 @@ classifiers = [
 ]
 dependencies = [
     "livekit-agents[codecs]>=1.5.8",
-    "gnani-vachana>=0.7.3,<1.0",
+    "gnani-vachana>=0.7.7,<1.0",
     "websockets>=12.0,<16.0",
 ]
 

@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - 2026-07-16
+
+### Changed
+
+- **Breaking: default TTS model renamed** — default model is now `timbre-v2.0` (was `vachana-voice-v3`). Existing integrations should pass `model="timbre-v2.0"` explicitly if they relied on the old default name.
+- **Bumped `gnani-vachana` dependency to `>=0.7.7,<1.0`** — picks up Timbre model catalogs, language validation, and SDK validators shared with this plugin.
+
+### Added
+
+- **`timbre-v2.5` support** — 42-voice catalog with per-voice language control via the new `language` parameter (BCP-47 codes such as `hi-IN`, `en-IN`, `ta-IN`).
+- **Model-aware voice validation** — voices are validated against the selected model (`timbre-v2.0` = 4 voices, `timbre-v2.5` = 42 voices).
+- **16-bit PCM alignment** — SSE, WebSocket, and `SynthesizeStream` paths align streaming PCM to whole 16-bit samples and parse RIFF/WAV headers with `struct` instead of a fixed 44-byte offset.
+- **Re-exports** — `DEFAULT_MODEL`, `TIMBRE_V20_VOICES`, `TIMBRE_V25_VOICES`, and `SUPPORTED_TTS_LANGUAGES` are now available from `livekit.plugins.gnani`.
+
 ## [0.5.3] - 2026-07-14
 
 ### Removed

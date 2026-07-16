@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 from .log import logger
 
 GnaniSTTFormat = Literal["verbatim", "transcribe"]
+GnaniSTTRecognizeMethod = Literal["rest", "websocket"]
 
 GNANI_STT_BASE_URL = "https://api.vachana.ai"
 
@@ -128,6 +129,7 @@ class GnaniSTTOptions:
     base_url: str = GNANI_STT_BASE_URL
     format: str = "verbatim"
     itn_native_numerals: bool = False
+    recognize_method: str = "websocket"
 
 
 _DEPRECATED_STT_KWARGS = frozenset(("organization_id", "user_id", "http_session"))
@@ -159,6 +161,9 @@ class STT(stt.STT):
         base_url: Vachana API base URL.
         format: "verbatim" (default) or "transcribe" (enables ITN).
         itn_native_numerals: Render digits in native script when format="transcribe".
+        recognize_method: Recognition transport — "rest" (POST /stt/v3) or
+            "websocket" (wss://.../stt/v3/stream). REST mode requires a local VAD
+            (LiveKit wraps with ``stt.StreamAdapter`` automatically).
     """
 
     def __init__(
@@ -170,11 +175,12 @@ class STT(stt.STT):
         base_url: str = GNANI_STT_BASE_URL,
         format: GnaniSTTFormat = "verbatim",
         itn_native_numerals: bool = False,
+        recognize_method: GnaniSTTRecognizeMethod = "websocket",
         **kwargs: Any,
     ) -> None:
         super().__init__(
             capabilities=stt.STTCapabilities(
-                streaming=True,
+                streaming=recognize_method == "websocket",
                 interim_results=False,
                 aligned_transcript=False,
             )
@@ -202,6 +208,7 @@ class STT(stt.STT):
             base_url=base_url,
             format=format,
             itn_native_numerals=itn_native_numerals,
+            recognize_method=recognize_method,
         )
         self._session: aiohttp.ClientSession | None = None
 
@@ -310,6 +317,9 @@ class STT(stt.STT):
         language: NotGivenOr[str] = NOT_GIVEN,
         conn_options: APIConnectOptions = DEFAULT_API_CONNECT_OPTIONS,
     ) -> SpeechStream:
+        if self._opts.recognize_method != "websocket":
+            return super().stream(language=language, conn_options=conn_options)
+
         opts = replace(self._opts)
         if is_given(language):
             opts.language = language
