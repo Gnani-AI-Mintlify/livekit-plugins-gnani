@@ -18,12 +18,13 @@ import json
 import os
 import struct
 from dataclasses import dataclass, replace
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import aiohttp
 
-from gnani.tts.client import (
+from gnani.tts.client import (  # type: ignore[import-untyped]
     DEFAULT_MODEL,
+    SUPPORTED_TTS_LANGUAGES,  # noqa: F401 — re-exported via livekit.plugins.gnani
     TIMBRE_V20_VOICES,
     TIMBRE_V25_VOICES,
     _validate_model,
@@ -83,10 +84,10 @@ def _ws_header_kwargs(headers: dict[str, str]) -> dict[str, Any]:
 
 def _voices_for_model(model: str) -> frozenset[str]:
     if model == "timbre-v2.5":
-        return TIMBRE_V25_VOICES
+        return cast("frozenset[str]", TIMBRE_V25_VOICES)
     if model == "timbre-v2.0":
-        return TIMBRE_V20_VOICES
-    return TIMBRE_V20_VOICES
+        return cast("frozenset[str]", TIMBRE_V20_VOICES)
+    return cast("frozenset[str]", TIMBRE_V20_VOICES)
 
 
 def _validate_voice_for_model(voice: str, model: str) -> None:

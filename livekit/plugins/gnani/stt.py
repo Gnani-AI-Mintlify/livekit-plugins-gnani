@@ -11,7 +11,7 @@ import contextlib
 import json
 import os
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import aiohttp
 
@@ -318,7 +318,10 @@ class STT(stt.STT):
         conn_options: APIConnectOptions = DEFAULT_API_CONNECT_OPTIONS,
     ) -> SpeechStream:
         if self._opts.recognize_method != "websocket":
-            return super().stream(language=language, conn_options=conn_options)
+            return cast(
+                "SpeechStream",
+                super().stream(language=language, conn_options=conn_options),
+            )
 
         opts = replace(self._opts)
         if is_given(language):

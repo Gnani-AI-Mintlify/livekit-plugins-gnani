@@ -8,15 +8,15 @@ including multilingual transcription scenarios.
 For API access, get a key at https://app.gnani.ai/voice
 """
 
-from gnani.tts import (
+from .stt import STT, SpeechStream
+from .tts import (
     DEFAULT_MODEL,
     SUPPORTED_TTS_LANGUAGES,
     TIMBRE_V20_VOICES,
     TIMBRE_V25_VOICES,
+    TTS,
+    SynthesizeStream,
 )
-
-from .stt import STT, SpeechStream
-from .tts import TTS, SynthesizeStream
 from .version import __version__
 
 __all__ = [
