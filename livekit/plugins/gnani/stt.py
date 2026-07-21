@@ -1,6 +1,6 @@
-"""Speech-to-Text implementation for Gnani Vachana
+"""Speech-to-Text implementation for Gnani
 
-This module provides an STT implementation that uses the Gnani Vachana API,
+This module provides an STT implementation that uses the Gnani API,
 supporting both REST recognition and real-time streaming (WebSocket).
 """
 
@@ -150,16 +150,16 @@ def _check_deprecated_args(kwargs: dict[str, Any], *, caller: str = "STT.__init_
 
 
 class STT(stt.STT):
-    """Gnani Vachana Speech-to-Text implementation.
+    """Gnani Speech-to-Text implementation.
 
-    Provides speech-to-text functionality using Gnani's Vachana platform.
+    Provides speech-to-text functionality using Gnani's platform.
     Supports REST recognition and real-time streaming via WebSocket.
 
     Args:
         language: BCP-47 language code (e.g. "hi-IN", "en-IN").
         api_key: Gnani API key (falls back to GNANI_API_KEY env var).
         sample_rate: Audio sample rate for streaming (8000, 16000, 44100, or 48000).
-        base_url: Vachana API base URL.
+        base_url: Gnani API base URL.
         format: "verbatim" (default) or "transcribe" (enables ITN).
         itn_native_numerals: Render digits in native script when format="transcribe".
         recognize_method: Recognition transport — "rest" (POST /stt/v3) or
@@ -361,7 +361,7 @@ class STT(stt.STT):
 
 
 class SpeechStream(stt.RecognizeStream):
-    """WebSocket-based streaming STT for Gnani Vachana.
+    """WebSocket-based streaming STT for Gnani.
 
     Connects to wss://api.vachana.ai/stt/v3/stream and sends raw PCM audio
     in 1024-byte chunks (512 samples, 16-bit mono).

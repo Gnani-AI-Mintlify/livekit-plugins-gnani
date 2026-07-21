@@ -23,7 +23,6 @@ from typing import Any, Literal, cast
 import aiohttp
 
 from gnani.tts.client import (  # type: ignore[import-untyped]
-    DEFAULT_MODEL,
     SUPPORTED_TTS_LANGUAGES,  # noqa: F401 — re-exported via livekit.plugins.gnani
     TIMBRE_V20_VOICES,
     TIMBRE_V25_VOICES,
@@ -43,6 +42,7 @@ from livekit.agents import (
 from .log import logger
 from .request_id import _generate_request_id
 
+DEFAULT_MODEL = "timbre-v2.5"
 GNANI_TTS_BASE_URL = "https://api.vachana.ai"
 
 GnaniTTSVoices = Literal[
@@ -111,8 +111,8 @@ def _validate_tts_config(
 @dataclass
 class GnaniTTSOptions:
     api_key: str
-    voice: str = "Pranav"
-    model: str = DEFAULT_MODEL
+    voice: str = "Nalini"
+    model: str = "timbre-v2.5"
     language: str | None = None
     sample_rate: int = 16000
     encoding: str = "linear_pcm"
@@ -155,15 +155,15 @@ class TTS(tts.TTS):
         encoding: Audio encoding (linear_pcm or oggopus).
         container: Audio container format (raw, mp3, wav, mulaw, ogg).
         api_key: Gnani API key (falls back to GNANI_API_KEY env var).
-        base_url: Vachana API base URL.
+        base_url: Gnani API base URL.
         synthesize_method: Synthesis mode — "rest", "sse", or "websocket".
     """
 
     def __init__(
         self,
         *,
-        voice: GnaniTTSVoices | str = "Pranav",
-        model: str = DEFAULT_MODEL,
+        voice: GnaniTTSVoices | str = "Nalini",
+        model: str = "timbre-v2.5",
         language: str | None = None,
         sample_rate: int = 16000,
         num_channels: int = 1,
@@ -331,7 +331,7 @@ def _strip_wav_header(data: bytes) -> bytes:
 
     if len(data) <= _WAV_HEADER_SIZE:
         return b""
-    return b""
+    return data[_WAV_HEADER_SIZE:]
 
 
 class _Pcm16Aligner:
