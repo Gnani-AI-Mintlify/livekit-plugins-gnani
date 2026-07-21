@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from livekit.agents.utils import AudioBuffer
 
 from .log import logger
+from .request_id import _generate_request_id
 
 GnaniSTTFormat = Literal["verbatim", "transcribe"]
 GnaniSTTRecognizeMethod = Literal["rest", "websocket"]
@@ -265,9 +266,15 @@ class STT(stt.STT):
         if self._opts.itn_native_numerals:
             form_data.add_field("itn_native_numerals", "true")
 
+        request_id = _generate_request_id()
         headers: dict[str, str] = {
             "X-API-Key-ID": self._opts.api_key,
+            "X-API-Request-ID": request_id,
         }
+        logger.debug(
+            "[STT REST] recognize start",
+            extra={"request_id": request_id, "language": lang},
+        )
 
         try:
             async with self._ensure_session().post(
@@ -281,7 +288,12 @@ class STT(stt.STT):
             ) as res:
                 if res.status != 200:
                     error_text = await res.text()
-                    logger.error(f"Gnani STT API error: {res.status} - {error_text}")
+                    logger.error(
+                        "Gnani STT API error: %s - %s",
+                        res.status,
+                        error_text,
+                        extra={"request_id": request_id},
+                    )
                     raise APIStatusError(
                         message=f"Gnani STT API Error ({res.status}): {error_text}",
                         status_code=res.status,
@@ -290,11 +302,18 @@ class STT(stt.STT):
 
                 response_json = await res.json()
                 transcript = response_json.get("transcript", "")
-                request_id = response_json.get("request_id", "")
+                api_request_id = response_json.get("request_id", request_id)
+                logger.debug(
+                    "[STT REST] recognize complete",
+                    extra={
+                        "request_id": request_id,
+                        "transcript_length": len(transcript),
+                    },
+                )
 
                 return stt.SpeechEvent(
                     type=stt.SpeechEventType.FINAL_TRANSCRIPT,
-                    request_id=request_id,
+                    request_id=api_request_id,
                     alternatives=[
                         stt.SpeechData(
                             language=LanguageCode(lang),
@@ -305,10 +324,15 @@ class STT(stt.STT):
                 )
 
         except asyncio.TimeoutError as e:
+            logger.error(
+                "Gnani STT API request timed out",
+                extra={"request_id": request_id},
+            )
             raise APITimeoutError("Gnani STT API request timed out") from e
         except (APIStatusError, APIConnectionError, APITimeoutError):
             raise
         except Exception as e:
+            logger.error("Gnani STT error: %s", e, extra={"request_id": request_id})
             raise APIConnectionError(f"Gnani STT error: {e}") from e
 
     def stream(
@@ -356,6 +380,7 @@ class SpeechStream(stt.RecognizeStream):
             sample_rate=opts.sample_rate,
         )
         self._opts = opts
+        self._request_id: str = ""
 
     def _build_ws_url(self) -> str:
         base = self._opts.base_url
@@ -367,19 +392,31 @@ class SpeechStream(stt.RecognizeStream):
             ws_base = "wss://" + base
         return f"{ws_base}/stt/v3/stream"
 
-    async def _run(self) -> None:
-        import websockets
-
-        ws_url = self._build_ws_url()
+    def _build_ws_connect_headers(self, request_id: str) -> dict[str, str]:
         headers: dict[str, str] = {
             "x-api-key-id": self._opts.api_key,
             "lang_code": self._opts.language,
             "x-sample-rate": str(self._opts.sample_rate),
+            "x-api-request-id": request_id,
         }
         if self._opts.format != "verbatim":
             headers["x-format"] = self._opts.format
         if self._opts.itn_native_numerals:
             headers["itn_native_numerals"] = "true"
+        return headers
+
+    async def _run(self) -> None:
+        import websockets
+
+        ws_url = self._build_ws_url()
+        request_id = _generate_request_id()
+        self._request_id = request_id
+        headers = self._build_ws_connect_headers(request_id)
+
+        logger.debug(
+            "[STT WS] stream connect",
+            extra={"request_id": request_id},
+        )
 
         try:
             async with websockets.connect(
@@ -392,7 +429,16 @@ class SpeechStream(stt.RecognizeStream):
                 connected_msg = await asyncio.wait_for(ws.recv(), timeout=10)
                 connected_data = json.loads(connected_msg)
                 if connected_data.get("type") != "connected":
-                    logger.warning(f"Unexpected first message from Gnani STT: {connected_data}")
+                    logger.warning(
+                        "Unexpected first message from Gnani STT: %s",
+                        connected_data,
+                        extra={"request_id": request_id},
+                    )
+                else:
+                    logger.debug(
+                        "[STT WS] connected",
+                        extra={"request_id": request_id},
+                    )
 
                 send_task = asyncio.create_task(self._send_audio(ws), name="gnani-stt-send")
                 recv_task = asyncio.create_task(self._recv_messages(ws), name="gnani-stt-recv")
@@ -412,12 +458,26 @@ class SpeechStream(stt.RecognizeStream):
                     await utils.aio.gracefully_cancel(send_task, recv_task)
 
         except websockets.exceptions.ConnectionClosed as e:
+            logger.error(
+                "Gnani STT WebSocket closed unexpectedly: %s",
+                e,
+                extra={"request_id": request_id},
+            )
             raise APIConnectionError(f"Gnani STT WebSocket closed unexpectedly: {e}") from e
         except asyncio.TimeoutError as e:
+            logger.error(
+                "Gnani STT WebSocket connection timed out",
+                extra={"request_id": request_id},
+            )
             raise APITimeoutError("Gnani STT WebSocket connection timed out") from e
         except (APIConnectionError, APIStatusError, APITimeoutError):
             raise
         except Exception as e:
+            logger.error(
+                "Gnani STT WebSocket error: %s",
+                e,
+                extra={"request_id": request_id},
+            )
             raise APIConnectionError(f"Gnani STT WebSocket error: {e}") from e
 
     async def _send_audio(self, ws: Any) -> None:
@@ -456,10 +516,19 @@ class SpeechStream(stt.RecognizeStream):
                     if not text:
                         continue
 
+                    segment_id = data.get("segment_id", "")
+                    logger.debug(
+                        "[STT WS] transcript received",
+                        extra={
+                            "request_id": self._request_id,
+                            "segment_id": segment_id,
+                        },
+                    )
+
                     self._event_ch.send_nowait(
                         stt.SpeechEvent(
                             type=stt.SpeechEventType.FINAL_TRANSCRIPT,
-                            request_id=data.get("segment_id", ""),
+                            request_id=segment_id,
                             alternatives=[
                                 stt.SpeechData(
                                     language=LanguageCode(self._opts.language),
@@ -489,7 +558,11 @@ class SpeechStream(stt.RecognizeStream):
 
                 elif msg_type == "error":
                     error_msg = data.get("message", "Unknown error")
-                    logger.error(f"Gnani STT stream error: {error_msg}")
+                    logger.error(
+                        "Gnani STT stream error: %s",
+                        error_msg,
+                        extra={"request_id": self._request_id},
+                    )
                     raise APIStatusError(
                         message=f"Gnani STT stream error: {error_msg}",
                         status_code=500,

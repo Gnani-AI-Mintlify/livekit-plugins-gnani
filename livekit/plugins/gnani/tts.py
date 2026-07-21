@@ -41,6 +41,7 @@ from livekit.agents import (
 )
 
 from .log import logger
+from .request_id import _generate_request_id
 
 GNANI_TTS_BASE_URL = "https://api.vachana.ai"
 
@@ -54,12 +55,12 @@ GnaniTTSVoices = Literal[
 
 SUPPORTED_VOICES: set[str] = set(TIMBRE_V20_VOICES)
 
-GnaniTTSEncodings = Literal["linear_pcm", "oggopus"]
-GnaniTTSContainers = Literal["raw", "mp3", "wav", "mulaw", "ogg"]
-GnaniTTSBitrates = Literal["96k", "128k", "192k"]
+GnaniTTSEncodings = Literal["linear_pcm", "oggopus", "pcm_mulaw", "pcm_alaw"]
+GnaniTTSContainers = Literal["raw", "mp3", "wav", "ogg", "mulaw", "alaw"]
+GnaniTTSBitrates = Literal["32k", "64k", "96k", "128k", "192k"]
 GnaniTTSSynthesizeMethod = Literal["rest", "sse", "websocket"]
 
-SUPPORTED_SAMPLE_RATES = (8000, 16000, 22050, 44100)
+SUPPORTED_SAMPLE_RATES = (8000, 16000, 22050, 24000, 44100, 48000)
 
 _WAV_HEADER_SIZE = 44
 # Match RoomIO _ParticipantAudioOutput target frame size (sample_rate // 20).
@@ -298,11 +299,14 @@ def _streaming_payload_opts(opts: GnaniTTSOptions) -> GnaniTTSOptions:
     return replace(opts, container="raw")
 
 
-def _build_headers(opts: GnaniTTSOptions) -> dict[str, str]:
-    return {
+def _build_headers(opts: GnaniTTSOptions, request_id: str | None = None) -> dict[str, str]:
+    headers = {
         "X-API-Key-ID": opts.api_key,
         "Content-Type": "application/json",
     }
+    if request_id:
+        headers["X-API-Request-ID"] = request_id
+    return headers
 
 
 def _mime_type(opts: GnaniTTSOptions) -> str:
@@ -466,11 +470,19 @@ class RESTChunkedStream(tts.ChunkedStream):
         self._opts = replace(tts._opts)
 
     async def _run(self, output_emitter: tts.AudioEmitter) -> None:
+        api_request_id = _generate_request_id()
+        logger.debug(
+            "[TTS REST] synthesize start",
+            extra={
+                "request_id": api_request_id,
+                "text_length": len(self._input_text),
+            },
+        )
         try:
             async with self._tts._ensure_session().post(
                 url=f"{self._opts.base_url}/api/v1/tts/inference",
                 json=_build_payload(self._opts, self._input_text),
-                headers=_build_headers(self._opts),
+                headers=_build_headers(self._opts, request_id=api_request_id),
                 timeout=aiohttp.ClientTimeout(
                     total=self._conn_options.timeout,
                     sock_connect=self._conn_options.timeout,
@@ -478,7 +490,12 @@ class RESTChunkedStream(tts.ChunkedStream):
             ) as res:
                 if res.status != 200:
                     error_text = await res.text()
-                    logger.error("Gnani TTS REST error: %s - %s", res.status, error_text)
+                    logger.error(
+                        "Gnani TTS REST error: %s - %s",
+                        res.status,
+                        error_text,
+                        extra={"request_id": api_request_id},
+                    )
                     raise APIStatusError(
                         message=f"Gnani TTS API Error ({res.status}): {error_text}",
                         status_code=res.status,
@@ -486,6 +503,13 @@ class RESTChunkedStream(tts.ChunkedStream):
                     )
 
                 audio_bytes = await res.read()
+                logger.debug(
+                    "[TTS REST] synthesize complete",
+                    extra={
+                        "request_id": api_request_id,
+                        "audio_bytes": len(audio_bytes),
+                    },
+                )
 
                 request_id = utils.shortuuid()
                 output_emitter.initialize(
@@ -498,10 +522,19 @@ class RESTChunkedStream(tts.ChunkedStream):
                 output_emitter.flush()
 
         except asyncio.TimeoutError as e:
+            logger.error(
+                "Gnani TTS REST request timed out",
+                extra={"request_id": api_request_id},
+            )
             raise APITimeoutError("Gnani TTS REST request timed out") from e
         except (APIStatusError, APIConnectionError, APITimeoutError):
             raise
         except Exception as e:
+            logger.error(
+                "Gnani TTS REST error: %s",
+                e,
+                extra={"request_id": api_request_id},
+            )
             raise APIConnectionError(f"Gnani TTS REST error: {e}") from e
 
 
@@ -525,6 +558,11 @@ class SSEChunkedStream(tts.ChunkedStream):
 
     async def _run(self, output_emitter: tts.AudioEmitter) -> None:
         request_id = utils.shortuuid()
+        api_request_id = _generate_request_id()
+        logger.debug(
+            "[TTS SSE] synthesize start",
+            extra={"request_id": api_request_id},
+        )
         pusher = _StreamingAudioPusher(
             sample_rate=self._tts.sample_rate,
             num_channels=self._tts.num_channels,
@@ -534,7 +572,7 @@ class SSEChunkedStream(tts.ChunkedStream):
             async with self._tts._ensure_session().post(
                 url=f"{self._opts.base_url}/api/v1/tts/sse",
                 json=_build_payload(stream_opts, self._input_text),
-                headers=_build_headers(self._opts),
+                headers=_build_headers(self._opts, request_id=api_request_id),
                 timeout=aiohttp.ClientTimeout(
                     total=self._conn_options.timeout,
                     sock_connect=self._conn_options.timeout,
@@ -543,7 +581,12 @@ class SSEChunkedStream(tts.ChunkedStream):
             ) as res:
                 if res.status != 200:
                     error_text = await res.text()
-                    logger.error("Gnani TTS SSE error: %s - %s", res.status, error_text)
+                    logger.error(
+                        "Gnani TTS SSE error: %s - %s",
+                        res.status,
+                        error_text,
+                        extra={"request_id": api_request_id},
+                    )
                     raise APIStatusError(
                         message=f"Gnani TTS SSE Error ({res.status}): {error_text}",
                         status_code=res.status,
@@ -558,6 +601,7 @@ class SSEChunkedStream(tts.ChunkedStream):
                 )
 
                 buf = ""
+                chunk_num = 0
                 async for raw_bytes in res.content:
                     raw_line = raw_bytes.decode("utf-8").strip()
                     if not raw_line:
@@ -594,6 +638,14 @@ class SSEChunkedStream(tts.ChunkedStream):
 
                     audio_b64 = payload.get("audio", "")
                     if audio_b64:
+                        chunk_num += 1
+                        logger.debug(
+                            "[TTS SSE] chunk received",
+                            extra={
+                                "request_id": api_request_id,
+                                "chunk_num": chunk_num,
+                            },
+                        )
                         _process_and_push(
                             pusher,
                             output_emitter,
@@ -604,10 +656,19 @@ class SSEChunkedStream(tts.ChunkedStream):
                 output_emitter.flush()
 
         except asyncio.TimeoutError as e:
+            logger.error(
+                "Gnani TTS SSE request timed out",
+                extra={"request_id": api_request_id},
+            )
             raise APITimeoutError("Gnani TTS SSE request timed out") from e
         except (APIStatusError, APIConnectionError, APITimeoutError):
             raise
         except Exception as e:
+            logger.error(
+                "Gnani TTS SSE error: %s",
+                e,
+                extra={"request_id": api_request_id},
+            )
             raise APIConnectionError(f"Gnani TTS SSE error: {e}") from e
 
 
@@ -643,6 +704,11 @@ class WebSocketChunkedStream(tts.ChunkedStream):
         import websockets
 
         request_id = utils.shortuuid()
+        api_request_id = _generate_request_id()
+        logger.debug(
+            "[TTS WS] synthesize start",
+            extra={"request_id": api_request_id},
+        )
         pusher = _StreamingAudioPusher(
             sample_rate=self._tts.sample_rate,
             num_channels=self._tts.num_channels,
@@ -652,7 +718,7 @@ class WebSocketChunkedStream(tts.ChunkedStream):
             ws_url = self._build_ws_url()
             async with websockets.connect(
                 ws_url,
-                **_ws_header_kwargs(_build_headers(self._opts)),
+                **_ws_header_kwargs(_build_headers(self._opts, request_id=api_request_id)),
                 ping_interval=20,
                 ping_timeout=20,
                 close_timeout=10,
@@ -699,7 +765,11 @@ class WebSocketChunkedStream(tts.ChunkedStream):
 
                     elif msg_type == "error":
                         error_msg = payload.get("message", "Unknown error")
-                        logger.error("Gnani TTS WS error: %s", error_msg)
+                        logger.error(
+                            "Gnani TTS WS error: %s",
+                            error_msg,
+                            extra={"request_id": api_request_id},
+                        )
                         raise APIStatusError(
                             message=f"Gnani TTS stream error: {error_msg}",
                             status_code=500,
@@ -708,14 +778,32 @@ class WebSocketChunkedStream(tts.ChunkedStream):
 
                 pusher.finalize(output_emitter)
                 output_emitter.flush()
+                logger.debug(
+                    "[TTS WS] synthesize complete",
+                    extra={"request_id": api_request_id},
+                )
 
         except websockets.exceptions.ConnectionClosed as e:
+            logger.error(
+                "Gnani TTS WebSocket closed: %s",
+                e,
+                extra={"request_id": api_request_id},
+            )
             raise APIConnectionError(f"Gnani TTS WebSocket closed: {e}") from e
         except asyncio.TimeoutError as e:
+            logger.error(
+                "Gnani TTS WebSocket timed out",
+                extra={"request_id": api_request_id},
+            )
             raise APITimeoutError("Gnani TTS WebSocket timed out") from e
         except (APIStatusError, APIConnectionError, APITimeoutError):
             raise
         except Exception as e:
+            logger.error(
+                "Gnani TTS WebSocket error: %s",
+                e,
+                extra={"request_id": api_request_id},
+            )
             raise APIConnectionError(f"Gnani TTS WebSocket error: {e}") from e
 
 
@@ -746,6 +834,11 @@ class SynthesizeStream(tts.SynthesizeStream):
         import websockets
 
         request_id = utils.shortuuid()
+        api_request_id = _generate_request_id()
+        logger.debug(
+            "[TTS WS] synthesize start",
+            extra={"request_id": api_request_id},
+        )
         output_emitter.initialize(
             request_id=request_id,
             sample_rate=self._tts.sample_rate,
@@ -777,7 +870,7 @@ class SynthesizeStream(tts.SynthesizeStream):
             ws_url = self._build_ws_url()
             async with websockets.connect(
                 ws_url,
-                **_ws_header_kwargs(_build_headers(self._opts)),
+                **_ws_header_kwargs(_build_headers(self._opts, request_id=api_request_id)),
                 ping_interval=20,
                 ping_timeout=20,
                 close_timeout=10,
@@ -819,20 +912,43 @@ class SynthesizeStream(tts.SynthesizeStream):
 
                     elif msg_type == "error":
                         error_msg = payload.get("message", "Unknown error")
-                        logger.error("Gnani TTS WS error: %s", error_msg)
+                        logger.error(
+                            "Gnani TTS WS error: %s",
+                            error_msg,
+                            extra={"request_id": api_request_id},
+                        )
                         raise APIStatusError(
                             message=f"Gnani TTS stream error: {error_msg}",
                             status_code=500,
                             body=error_msg,
                         )
 
+                logger.debug(
+                    "[TTS WS] synthesize complete",
+                    extra={"request_id": api_request_id},
+                )
+
         except websockets.exceptions.ConnectionClosed as e:
+            logger.error(
+                "Gnani TTS WebSocket closed: %s",
+                e,
+                extra={"request_id": api_request_id},
+            )
             raise APIConnectionError(f"Gnani TTS WebSocket closed: {e}") from e
         except asyncio.TimeoutError as e:
+            logger.error(
+                "Gnani TTS WebSocket timed out",
+                extra={"request_id": api_request_id},
+            )
             raise APITimeoutError("Gnani TTS WebSocket timed out") from e
         except (APIStatusError, APIConnectionError, APITimeoutError):
             raise
         except Exception as e:
+            logger.error(
+                "Gnani TTS WebSocket error: %s",
+                e,
+                extra={"request_id": api_request_id},
+            )
             raise APIConnectionError(f"Gnani TTS WebSocket error: {e}") from e
         finally:
             pusher.finalize(output_emitter)
