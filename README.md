@@ -19,7 +19,7 @@ Or with [uv](https://docs.astral.sh/uv/):
 uv add livekit-plugins-gnani
 ```
 
-This will also install the [`gnani`](https://pypi.org/project/gnani/) core SDK as a dependency.
+This will also install the [`gnani-vachana`](https://pypi.org/project/gnani-vachana/) core SDK as a dependency.
 
 ## Prerequisites
 
@@ -154,7 +154,7 @@ The expanded catalog includes voices across Hindi, English, Tamil, Telugu, Kanna
 ## Architecture
 
 ```
-gnani (>=0.6.0)           <- Core SDK (REST, WebSocket, SSE clients; single api_key auth)
+gnani-vachana (>=0.7.9)   <- Core SDK on PyPI (imports as `gnani`)
     |
 livekit-plugins-gnani     <- This package (LiveKit Agents adapter)
 ```
@@ -165,7 +165,7 @@ This plugin is a thin adapter that wraps the `gnani` SDK into LiveKit's `stt.STT
 
 - [Gnani API Docs](https://docs.gnani.ai/)
 - [LiveKit Agents Docs](https://docs.livekit.io/agents/)
-- [gnani SDK](https://pypi.org/project/gnani/)
+- [Gnani SDK on PyPI](https://pypi.org/project/gnani-vachana/)
 
 ## License
 
