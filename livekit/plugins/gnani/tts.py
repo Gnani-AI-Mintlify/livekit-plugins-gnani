@@ -303,6 +303,7 @@ def _build_headers(opts: GnaniTTSOptions, request_id: str | None = None) -> dict
     headers = {
         "X-API-Key-ID": opts.api_key,
         "Content-Type": "application/json",
+        "X-Source": "livekit",
     }
     if request_id:
         headers["X-API-Request-ID"] = request_id

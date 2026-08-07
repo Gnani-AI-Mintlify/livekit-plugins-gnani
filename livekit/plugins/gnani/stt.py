@@ -270,6 +270,7 @@ class STT(stt.STT):
         headers: dict[str, str] = {
             "X-API-Key-ID": self._opts.api_key,
             "X-API-Request-ID": request_id,
+            "X-Source": "livekit",
         }
         logger.debug(
             "[STT REST] recognize start",
@@ -398,6 +399,7 @@ class SpeechStream(stt.RecognizeStream):
             "lang_code": self._opts.language,
             "x-sample-rate": str(self._opts.sample_rate),
             "x-api-request-id": request_id,
+            "x-source": "livekit",
         }
         if self._opts.format != "verbatim":
             headers["x-format"] = self._opts.format
